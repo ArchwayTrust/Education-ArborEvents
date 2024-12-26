@@ -1,7 +1,35 @@
 import requests
 
 class ArborEvents:
+    """Class to interact with Arbor Events API
+    Attributes:
+        base_url (str): Base URL of Arbor instance
+        rest_url (str): Base URL for REST endpoints
+        graphql_url (str): GraphQL endpoint
+        auth (tuple): Arbor API username and password
+    Methods:
+        list_event_types: List all event types
+        get_event_type: Get event type by code  
+        create_event_type: Create a new event type
+        disable_event_type: Disable an event type
+        enable_event_type: Enable an event type
+        delete_event_type: Delete an event type
+        lookup_room_id: Based on room name lookup it's id
+        create_room_unavailability: Create room unavailability
+        lookup_email_owner_id: Lookup the owner of an email address
+        list_school_events: List all school events
+        create_school_event: Create a new school event
+        delete_school_event: Delete a school event"""
+    
     def __init__(self, base_url, username, password):
+        """Initialize ArborEvents class
+        Args:
+            base_url (str): Base URL of Arbor instance
+            username (str): Arbor API username
+            password (str): Arbor API password
+        Returns:
+            None"""
+        
         self.base_url = base_url
         self.rest_url = f"{base_url}/rest-v2"  # Base URL for REST endpoints
         self.graphql_url = f"{base_url}/graphql/query"  # GraphQL endpoint
