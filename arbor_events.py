@@ -8,16 +8,31 @@ class ArborEvents:
         self.auth = (username, password)
 
     def list_event_types(self):
+        """List all event types
+        Returns:
+            response: Response object"""
         api_url = f"{self.rest_url}/school-event-types/"
         response = requests.get(api_url, auth=self.auth)
         return response.json()
 
     def get_event_type(self, event_code):
+        """Get event type by code
+        Args:
+            event_code (str): Event code
+        Returns:
+            response: Response object"""
         api_url = f"{self.rest_url}/school-event-types/{event_code}"
         response = requests.get(api_url, auth=self.auth)
         return response.json()
 
     def create_event_type(self, event_code, event_name):
+        """Create a new event type
+        Args:
+            event_code (str): Event code
+            event_name (str): Event name
+        Returns:
+            response: Response object"""
+        
         api_url = f"{self.rest_url}/school-event-types/"
         payload = {
             "request": {
@@ -30,9 +45,15 @@ class ArborEvents:
             }
         }
         response = requests.post(api_url, json=payload, auth=self.auth)
-        return response.text
+        return response
 
     def disable_event_type(self, event_code):
+        """Disable an event type
+        Args:
+            event_code (str): Event code
+        Returns:
+            response: Response object"""
+        
         api_url = f"{self.rest_url}/school-event-types/{event_code}"
         payload = {
             "request": {
@@ -47,6 +68,12 @@ class ArborEvents:
         return response.text
     
     def enable_event_type(self, event_code):
+        """Enable an event type
+        Args:
+            event_code (str): Event code
+        Returns:
+            response: Response object"""
+        
         api_url = f"{self.rest_url}/school-event-types/{event_code}"
         payload = {
             "request": {
@@ -61,6 +88,12 @@ class ArborEvents:
         return response.text
 
     def delete_event_type(self, event_code):
+        """Delete an event type
+        Args:
+            event_code (str): Event code
+        Returns:
+            response: Response object"""
+        
         api_url = f"{self.rest_url}/school-event-types/{event_code}"
         response = requests.delete(api_url, auth=self.auth)
         return response.text
@@ -126,17 +159,60 @@ class ArborEvents:
 
         return response
 
-    def find_person(self, person_id):
-        api_url = f"{self.rest_url}/persons/{person_id}"
-        response = requests.get(api_url, auth=self.auth)
-        return response.json()
+    def lookup_email_owner_id(self, email_address, email_address_type="WORK"):
+        """
+        Lookup the owner of an email address
+        Args:
+            email_address (str): Email address to search for
+            email_address_type (str): Email address type (default: "WORK")
+        Returns:
+            owner_id (str): Owner ID of the email address"""
+        
+        query = f"""
+        {{
+            EmailAddress(emailAddress: "{email_address}", emailAddressType: "{email_address_type}"){{
+                id
+                emailAddress
+                emailAddressType
+                emailAddressOwner{{
+                    id
+                    entityType
+                }}
+            }}
+        }}
+        """
+        response = requests.post(self.graphql_url, json={"query": query}, auth=self.auth)
+        data = response.json()
+
+        email_addresses = data["data"]["EmailAddress"]
+        for entry in email_addresses:
+            if entry["emailAddressOwner"]["entityType"] == "Staff":
+                return entry["emailAddressOwner"]["id"]
+        
+        return None
 
     def list_school_events(self):
+        """
+        List all school events
+        Returns:
+            response: Response object"""
+        
         api_url = f"{self.rest_url}/school-events/"
         response = requests.get(api_url, auth=self.auth)
         return response.json()
 
     def create_school_event(self, event_name, start_datetime, end_datetime, event_type_href, location_href, narrative):
+        """Create a new school event
+        Args:
+            event_name (str): Event name
+            start_datetime (str): Start datetime in string format (e.g. "2024-12-21 16:00:00")
+            end_datetime (str): End datetime in string format (e.g. "2024-12-21 17:00:00")
+            event_type_href (str): Event type href
+            location_href (str): Location href
+            narrative (str): Event narrative
+        Returns:
+            response: Response object"""
+        
         api_url = f"{self.rest_url}/school-events/"
         payload = {
             "request": {
@@ -162,17 +238,12 @@ class ArborEvents:
         return response.text
 
     def delete_school_event(self, event_id):
+        """Delete a school event
+        Args:
+            event_id (str): Event ID
+        Returns:
+            response: Response object"""
+        
         api_url = f"{self.rest_url}/school-events/{event_id}"
         response = requests.delete(api_url, auth=self.auth)
-        return response.text
-
-# Example usage:
-# arbor = ArborEvents("https://your-base-url", "username", "password")
-# print(arbor.list_event_types())
-# print(arbor.get_event_type("DOBBS_EVENT_2"))
-# print(arbor.create_event_type("DOBBS_EVENT_2", "Dobbs New Event Type 2"))
-# print(arbor.edit_event_type("DOBBS_EVENT_2", "DOBBS_EVENT", "Dobbs New Event Type"))
-# print(arbor.delete_event_type("DOBBS_EVENT_2"))
-# print(arbor.find_person("12345"))
-# print(arbor.list_school_events())
-# print(arbor.delete_school_event("67890"))
+        return response
