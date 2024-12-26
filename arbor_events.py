@@ -64,6 +64,67 @@ class ArborEvents:
         api_url = f"{self.rest_url}/school-event-types/{event_code}"
         response = requests.delete(api_url, auth=self.auth)
         return response.text
+    
+    def lookup_room_id(self, room_to_find):
+        """Based on room name lookup it's id
+        Args:
+            room_to_find (str): Room name to search for
+        Returns:
+            room_id (str): Room id"""
+        
+        # Create the GraphQL query
+        query = f"""
+        {{
+            Room(roomName: "{room_to_find}"){{
+                id
+            }}
+        }}
+        """
+        # Send the request
+        response = requests.post(self.graphql_url, json={"query": query}, auth=self.auth)
+
+        # Check response
+        if response.status_code == 200:
+            try:
+                room_id = response.json()["data"]["Room"][0]["id"]
+                return room_id
+            except:
+                raise RuntimeError("Room not found.")
+        else:
+            raise RuntimeError(f"Request failed with status code: {response.status_code}")
+        
+    def create_room_unavailability(self, room_id, start_str, end_str, reason_str):
+        """Create room unavailability.
+        Args:
+            room_id (str): Room id
+            start_str (str): Start datetime in string format (e.g. "2024-12-21 16:00:00")
+            end_str (str): End datetime in string format (e.g. "2024-12-21 17:00:00")
+            reason_str (str): Reason for unavailability
+        Returns:
+            response: Response object"""
+
+        api_url = f"{self.rest_url}/roomUnavailability"
+        payload = {
+            "request":
+            {
+                "roomUnavailability": 
+                    {
+                        "room":
+                            {
+                                "entityType": 'Room',
+                                "id": room_id,
+                                "href": f"/rest-v2/rooms/{room_id}",
+                            },
+                        "startDatetime": start_str,
+                        "endDatetime": end_str,
+                        'reason': reason_str
+                    }
+            }
+        }
+
+        response = requests.post(api_url, json=payload, auth=self.auth)
+
+        return response
 
     def find_person(self, person_id):
         api_url = f"{self.rest_url}/persons/{person_id}"
