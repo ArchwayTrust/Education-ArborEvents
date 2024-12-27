@@ -230,7 +230,7 @@ class ArborEvents:
             if entry["emailAddressOwner"]["entityType"] == "Staff":
                 return entry["emailAddressOwner"]["id"]
         
-        return None
+        raise RuntimeError(f"User with email address {email_address} not found.")
 
     def list_school_events(self):
         """
