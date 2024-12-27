@@ -1,4 +1,5 @@
 import requests
+import re
 
 class ArborEvents:
     """Class to interact with Arbor Events API
@@ -239,7 +240,7 @@ class ArborEvents:
             location_href (str): Location href
             narrative (str): Event narrative
         Returns:
-            response: Response object"""
+            href (str): Event href"""
         
         api_url = f"{self.rest_url}/school-events/"
         payload = {
@@ -263,7 +264,45 @@ class ArborEvents:
             }
         }
         response = requests.post(api_url, json=payload, auth=self.auth)
-        return response.text
+        data = response.json()
+        if data['status']['code'] == 201:
+            # Extract href
+            href = data['schoolEvent']['href']
+        else:
+            raise RuntimeError(f"Error creating event. response.status_code - {response.status_code}, response.text - {response.text}")
+
+        return href
+
+    def add_event_participant(self, event_href, participant_id, participant_type="Staff"):
+        """Add a participant to an event.
+        Args:
+            event_href (str): Event href (returned when even created)
+            participant_id (str): Participant ID
+            participant_type (str): Type of participant (default is "Staff")
+        Returns:
+            bool: True if participant was added successfully, False otherwise
+        """
+        api_url = f"{self.rest_url}/eventParticipants"
+        payload = {
+            "request": {
+                "eventParticipant": {
+                    "entityType": "eventParticipant",
+                    "event": {
+                        "entityType": "SchoolEvent",
+                        "href": event_href
+                    },
+                    "participant": {
+                        "entityType": participant_type,
+                        "href": f"/rest-v2/{participant_type}/{participant_id}"
+                    }
+                }
+            }
+        }
+        response = requests.post(api_url, json=payload, auth=self.auth)
+        if response.status_code == 201:
+            return True
+        else:
+            raise RuntimeError(f"Error adding participant. status_code: {response.status_code}, text: - {response.text}")
 
     def delete_school_event(self, event_id):
         """Delete a school event
