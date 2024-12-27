@@ -36,6 +36,20 @@ class ArborEvents:
         self.graphql_url = f"{base_url}/graphql/query"  # GraphQL endpoint
         self.auth = (username, password)
 
+    def _post_request(self, url, payload):
+        response = requests.post(url, json=payload, auth=self.auth)
+        if response.status_code == 201:
+            return response.json()
+        else:
+            raise RuntimeError(f"Request failed. status_code: {response.status_code}, text: {response.text}")
+
+    def _delete_request(self, url):
+        response = requests.delete(url, auth=self.auth)
+        if response.status_code == 204:
+            return True
+        else:
+            raise RuntimeError(f"Request failed. status_code: {response.status_code}, text: {response.text}")
+
     def list_event_types(self):
         """List all event types
         Returns:
@@ -184,9 +198,7 @@ class ArborEvents:
             }
         }
 
-        response = requests.post(api_url, json=payload, auth=self.auth)
-
-        return response
+        return self._post_request(api_url, payload)
 
     def lookup_email_owner_id(self, email_address, email_address_type="WORK"):
         """
@@ -263,15 +275,8 @@ class ArborEvents:
                 }
             }
         }
-        response = requests.post(api_url, json=payload, auth=self.auth)
-        data = response.json()
-        if data['status']['code'] == 201:
-            # Extract href
-            href = data['schoolEvent']['href']
-        else:
-            raise RuntimeError(f"Error creating event. response.status_code - {response.status_code}, response.text - {response.text}")
-
-        return href
+        data = self._post_request(api_url, payload)
+        return data['schoolEvent']['href']
 
     def add_event_participant(self, event_href, participant_id, participant_type="Staff"):
         """Add a participant to an event.
@@ -298,11 +303,8 @@ class ArborEvents:
                 }
             }
         }
-        response = requests.post(api_url, json=payload, auth=self.auth)
-        if response.status_code == 201:
-            return True
-        else:
-            raise RuntimeError(f"Error adding participant. status_code: {response.status_code}, text: - {response.text}")
+        self._post_request(api_url, payload)
+        return True
 
     def delete_school_event(self, event_id):
         """Delete a school event
@@ -312,5 +314,4 @@ class ArborEvents:
             response: Response object"""
         
         api_url = f"{self.rest_url}/school-events/{event_id}"
-        response = requests.delete(api_url, auth=self.auth)
-        return response
+        return self._delete_request(api_url)
