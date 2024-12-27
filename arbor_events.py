@@ -66,7 +66,7 @@ class ArborEvents:
             response: Response object"""
         api_url = f"{self.rest_url}/school-event-types/{event_code}"
         response = requests.get(api_url, auth=self.auth)
-        return response.json()
+        return response
 
     def create_event_type(self, event_code, event_name):
         """Create a new event type
@@ -108,7 +108,7 @@ class ArborEvents:
             }
         }
         response = requests.put(api_url, json=payload, auth=self.auth)
-        return response.text
+        return response
     
     def enable_event_type(self, event_code):
         """Enable an event type
@@ -128,7 +128,7 @@ class ArborEvents:
             }
         }
         response = requests.put(api_url, json=payload, auth=self.auth)
-        return response.text
+        return response
 
     def delete_event_type(self, event_code):
         """Delete an event type
@@ -139,7 +139,7 @@ class ArborEvents:
         
         api_url = f"{self.rest_url}/school-event-types/{event_code}"
         response = requests.delete(api_url, auth=self.auth)
-        return response.text
+        return response
     
     def lookup_room_id(self, room_to_find):
         """Based on room name lookup it's id
@@ -177,7 +177,7 @@ class ArborEvents:
             end_str (str): End datetime in string format (e.g. "2024-12-21 17:00:00")
             reason_str (str): Reason for unavailability
         Returns:
-            response: Response object"""
+            response: Response json"""
 
         api_url = f"{self.rest_url}/roomUnavailability"
         payload = {
@@ -242,14 +242,14 @@ class ArborEvents:
         response = requests.get(api_url, auth=self.auth)
         return response.json()
 
-    def create_school_event(self, event_name, start_datetime, end_datetime, event_type_href, location_href, narrative):
+    def create_school_event(self, event_name, start_datetime, end_datetime, event_type_code, room_id, narrative):
         """Create a new school event
         Args:
             event_name (str): Event name
             start_datetime (str): Start datetime in string format (e.g. "2024-12-21 16:00:00")
             end_datetime (str): End datetime in string format (e.g. "2024-12-21 17:00:00")
-            event_type_href (str): Event type href
-            location_href (str): Location href
+            event_type_code (str): Event type code (e.g. "MEETING")
+            room_id (int): Room Id code
             narrative (str): Event narrative
         Returns:
             href (str): Event href"""
@@ -263,15 +263,14 @@ class ArborEvents:
                     "endDatetime": end_datetime,
                     "schoolEventType": {
                         "entityType": "SchoolEventType",
-                        "href": event_type_href
+                        "href": f"/rest-v2/school-event-types/{event_type_code}"
                     },
                     "location": {
                         "entityType": "Room",
-                        "href": location_href
+                        "href": f"/rest-v2/rooms/{room_id}"
                     },
                     "schoolEventName": event_name,
-                    "narrative": narrative,
-                    "active": True
+                    "narrative": narrative
                 }
             }
         }
