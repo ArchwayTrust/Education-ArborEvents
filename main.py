@@ -50,7 +50,7 @@ for row in df.iter_rows(named=True):
             event_type_code=row['Event Type'],
             room_id=room_id,
             event_name=row['Room Name'],
-            narrative="Room booking event"
+            narrative=row['Narrative']
         )
 
         # Add the participant if email is supplied
