@@ -26,7 +26,7 @@ secret = secret_client.get_secret(secret_name)
 arbor = ArborEvents(academy_url, "ALTStaffUpdater", secret.value)
 
 # Load the CSV file
-csv_file_path = "path/to/your/room_bookings.csv"
+csv_file_path = "ExampleData.csv"
 df = pl.read_csv(csv_file_path)
 
 # Prepare a list to store the results
@@ -36,26 +36,26 @@ results = []
 for row in df.iter_rows(named=True):
     try:
         # Look up the room ID
-        room_id = arbor.get_room_id(row['Room Name'])
+        room_id = arbor.lookup_room_id(row['Room Name'])
 
         # Look up the staff ID if participant email is supplied
         staff_id = None
         if row['Participant Email']:
-            staff_id = arbor.get_staff_email_owner_id(row['Participant Email'])
+            staff_id = arbor.lookup_email_owner_id(row['Participant Email'])
 
         # Create the event
         event_href = arbor.create_school_event(
             start_datetime=row['Datetime From'],
             end_datetime=row['Datetime To'],
-            event_type_href=row['Event Type'],
-            location_href=f"/rest-v2/rooms/{room_id}",
+            event_type_code=row['Event Type'],
+            room_id=room_id,
             event_name=row['Room Name'],
             narrative="Room booking event"
         )
 
         # Add the participant if email is supplied
         if staff_id:
-            arbor.add_event_participant(event_href.split('/')[-1], staff_id)
+            arbor.add_event_participant(event_href, staff_id)
 
         # Append success result
         results.append({**row, "Status": "Success"})
@@ -66,4 +66,4 @@ for row in df.iter_rows(named=True):
 
 # Save the results to a new CSV file
 result_df = pl.DataFrame(results)
-result_df.write_csv("path/to/your/room_bookings_results.csv")
+result_df.write_csv("room_bookings_results.csv")
