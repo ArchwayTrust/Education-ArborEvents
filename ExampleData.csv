@@ -1,0 +1,7 @@
+Datetime From,Datetime To,Event Type,Room Name,Narrative,Participant Email
+2024-12-28 09:00:00,2024-12-28 10:00:00,MEETING,101,This is an event that should work.,bdobbs@archwaytrust.co.uk
+2024-12-28 10:00:00,2024-12-28 11:00:00,MEETING,Weird Room,This is an event that will fail on room,bdobbs@archwaytrust.co.uk
+2024-12-28 10:00:00,2024-12-28 11:00:00,WEIRD,101,This is an event that will fail Event Type,bdobbs@archwaytrust.co.uk
+2024-12-28 10:00:00,2024-12-28 11:00:00,MEETING,101,This is an event that will fail on participant,weird@archwaytrust.co.uk
+2024-12-28 13:00:00,2024-12-28 14:00:00,MEETING,101,Should work but no participant,
+2024-12-28 13:00:00,2024-12-28 11:00:00,MEETING,101,Datetime range should throw error,
