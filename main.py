@@ -7,7 +7,7 @@ from arbor_events import ArborEvents
 import polars as pl
 
 # Replace with url of Arbor instance
-academy_url = "https://api-sandbox2.uk.arbor.sc"
+academy_url = "https://api-sandbox.uk.arbor.sc"
 
 # Replace with your Key Vault URL
 key_vault_url = "https://altakv01.vault.azure.net/"
@@ -19,11 +19,11 @@ credential = InteractiveBrowserCredential(additionally_allowed_tenants=["23990c8
 secret_client = SecretClient(vault_url=key_vault_url, credential=credential)
 
 # Retrieve a secret from the Key Vault
-secret_name = "ArborStaffUpdaterPassword"
+secret_name = "Arbor-SchoolEvents"
 secret = secret_client.get_secret(secret_name)
 
 # Initialize ArborEvents
-arbor = ArborEvents(academy_url, "ALTStaffUpdater", secret.value)
+arbor = ArborEvents(academy_url, "ALTSchoolEvents", secret.value)
 
 # Load the CSV file
 csv_file_path = "ExampleData.csv"
