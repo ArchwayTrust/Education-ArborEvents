@@ -58,11 +58,11 @@ for row in df.iter_rows(named=True):
             arbor.add_event_participant(event_href, staff_id)
 
         # Append success result
-        results.append({**row, "Status": "Success"})
+        results.append({**row, "Status": "Success", "Event Href": event_href})
 
     except Exception as e:
         # Append error result
-        results.append({**row, "Status": f"Error: {str(e)}"})
+        results.append({**row, "Status": f"Error: {str(e)}", "Event Href": None})
 
 # Save the results to a new CSV file
 result_df = pl.DataFrame(results)
